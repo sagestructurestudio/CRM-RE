@@ -1,0 +1,27 @@
+name: GWS CLI Test
+on: [workflow_dispatch]
+
+jobs:
+  gws:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm install -g @googleworkspace/cli
+
+      - name: Write creds
+        run: |
+          cat > /tmp/gws-creds.json <<'JSON'
+          ${{ secrets.GWS_CREDENTIALS_JSON }}
+          JSON
+
+      - name: Test gws
+        env:
+          GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
+        run: |
+          gws --version
+          gws drive files list --params '{"pageSize": 5}'

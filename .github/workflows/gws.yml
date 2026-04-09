@@ -26,16 +26,13 @@ jobs:
           JSON
           jq -e . /tmp/gws-creds.json > /dev/null
 
-      - name: Test gws auth
+      - name: Test gws
         env:
           GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
         run: |
           set -euo pipefail
           gws --version
-          gws auth print-access-token > /dev/null
-          echo "Auth OK"
-
-      - name: Test Drive list
+          gws drive files list --params '{"pageSize": 5}'
         env:
           GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
         run: |

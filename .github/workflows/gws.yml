@@ -1,7 +1,7 @@
-- name: Write and validate creds
+- name: Write creds
   run: |
+    set -euo pipefail
     cat > /tmp/gws-creds.json <<'JSON'
     ${{ secrets.GWS_CREDENTIALS_JSON }}
     JSON
-    # Validate JSON and required fields
-    jq '.client_id, .client_secret, .refresh_token' /tmp/gws-creds.json || exit 1
+    jq -e . /tmp/gws-creds.json > /dev/null

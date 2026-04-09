@@ -1,33 +1,43 @@
-- name: Write creds
-  run: |
-    set -euo pipefail
-    cat > /tmp/gws-creds.json <<'JSON'
-    ${{ secrets.GWS_CREDENTIALS_JSON }}
-    JSON
-    jq -e . /tmp/gws-creds.json > /dev/null
+name: GWS CLI Test
 
-    - name: Test gws
-  env:
-    GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
-  run: |
-    set -euo pipefail
-    gws --version
-    gws auth print-access-token > /dev/null
-    gws drive files list --params '{"pageSize": 5}'
+on:
+  workflow_dispatch:
 
-- name: Write creds
-  run: |
-    set -euo pipefail
-    cat > /tmp/gws-creds.json <<'JSON'
-    ${{ secrets.GWS_CREDENTIALS_JSON }}
-    JSON
-    jq -e . /tmp/gws-creds.json > /dev/null
+jobs:
+  gws:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Test gws
-  env:
-    GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
-  run: |
-    set -euo pipefail
-    gws --version
-    gws auth print-access-token > /dev/null
-    gws drive files list --params '{"pageSize": 5}'
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install gws
+        run: npm install -g @googleworkspace/cli
+
+      - name: Write creds file
+        run: |
+          set -euo pipefail
+          cat > /tmp/gws-creds.json <<'JSON'
+          ${{ secrets.GWS_CREDENTIALS_JSON }}
+          JSON
+          jq -e . /tmp/gws-creds.json > /dev/null
+
+      - name: Test gws auth
+        env:
+          GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
+        run: |
+          set -euo pipefail
+          gws --version
+          gws auth print-access-token > /dev/null
+          echo "Auth OK"
+
+      - name: Test Drive list
+        env:
+          GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
+        run: |
+          set -euo pipefail
+          gws drive files list --params '{"pageSize": 5}'

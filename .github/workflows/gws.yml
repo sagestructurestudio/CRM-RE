@@ -14,3 +14,20 @@
     gws --version
     gws auth print-access-token > /dev/null
     gws drive files list --params '{"pageSize": 5}'
+
+- name: Write creds
+  run: |
+    set -euo pipefail
+    cat > /tmp/gws-creds.json <<'JSON'
+    ${{ secrets.GWS_CREDENTIALS_JSON }}
+    JSON
+    jq -e . /tmp/gws-creds.json > /dev/null
+
+    - name: Test gws
+  env:
+    GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE: /tmp/gws-creds.json
+  run: |
+    set -euo pipefail
+    gws --version
+    gws auth print-access-token > /dev/null
+    gws drive files list --params '{"pageSize": 5}'
